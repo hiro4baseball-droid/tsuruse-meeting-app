@@ -39,6 +39,19 @@ model Item {
   @@index([category])
 }
 
+// 毎回の会議で確認する定型議題（目標人数・現状・体験数・アクションリスト）
+model WeeklyReport {
+  id              String   @id @default(cuid())
+  meetingWeek     DateTime @unique
+  targetBySummer  Int?
+  currentCount    Int?
+  trialCount      Int?
+  concreteActions String?
+  internalActions String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+}
+
 model Comment {
   id        String   @id @default(cuid())
   itemId    String

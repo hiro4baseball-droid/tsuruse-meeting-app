@@ -1,8 +1,9 @@
 import Link from "next/link";
 import { prisma } from "@/lib/prisma";
-import { serializeItem, serializeMember } from "@/lib/serialize";
+import { serializeItem, serializeMember, serializeWeeklyReport } from "@/lib/serialize";
 import { addWeeks, formatWeekLabel, fromDateKey, mondayOf, toDateKey } from "@/lib/week";
 import AgendaBoard from "@/components/AgendaBoard";
+import WeeklyReportForm from "@/components/WeeklyReportForm";
 
 export const dynamic = "force-dynamic";
 
@@ -18,14 +19,25 @@ export default async function AgendaPage({
   const nextWeekKey = toDateKey(addWeeks(monday, 1));
   const isCurrentWeek = weekKey === toDateKey(mondayOf(new Date()));
 
-  const [items, members] = await Promise.all([
+  const [items, members, thisWeekReport, previousReport] = await Promise.all([
     prisma.item.findMany({
       where: { meetingWeek: monday },
       orderBy: [{ status: "asc" }, { createdAt: "asc" }],
       include: { _count: { select: { comments: true } } },
     }),
     prisma.member.findMany({ orderBy: { name: "asc" } }),
+    prisma.weeklyReport.findUnique({ where: { meetingWeek: monday } }),
+    prisma.weeklyReport.findFirst({
+      where: { meetingWeek: { lt: monday } },
+      orderBy: { meetingWeek: "desc" },
+    }),
   ]);
+
+  const report = thisWeekReport
+    ? serializeWeeklyReport(thisWeekReport, monday, false)
+    : previousReport
+      ? serializeWeeklyReport(previousReport, monday, true)
+      : null;
 
   return (
     <div className="flex flex-col gap-4">
@@ -45,6 +57,8 @@ export default async function AgendaPage({
           </Link>
         )}
       </div>
+
+      <WeeklyReportForm report={report} meetingWeek={weekKey} />
 
       <AgendaBoard items={items.map(serializeItem)} members={members.map(serializeMember)} meetingWeek={weekKey} />
     </div>

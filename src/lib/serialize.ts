@@ -1,4 +1,4 @@
-import type { Category, ItemDTO, MemberDTO, Status } from "@/lib/types";
+import type { Category, ItemDTO, MemberDTO, Status, WeeklyReportDTO } from "@/lib/types";
 
 type PrismaItem = {
   id: string;
@@ -37,5 +37,30 @@ export function serializeMember(member: { id: string; name: string; createdAt: D
     id: member.id,
     name: member.name,
     createdAt: member.createdAt.toISOString(),
+  };
+}
+
+type PrismaWeeklyReport = {
+  meetingWeek: Date;
+  targetBySummer: number | null;
+  currentCount: number | null;
+  trialCount: number | null;
+  concreteActions: string | null;
+  internalActions: string | null;
+};
+
+export function serializeWeeklyReport(
+  report: PrismaWeeklyReport,
+  meetingWeek: Date,
+  isDraft: boolean
+): WeeklyReportDTO {
+  return {
+    meetingWeek: meetingWeek.toISOString(),
+    targetBySummer: report.targetBySummer,
+    currentCount: report.currentCount,
+    trialCount: report.trialCount,
+    concreteActions: report.concreteActions,
+    internalActions: report.internalActions,
+    isDraft,
   };
 }

@@ -30,6 +30,17 @@ export type MemberDTO = {
   createdAt: string;
 };
 
+export type WeeklyReportDTO = {
+  meetingWeek: string;
+  targetBySummer: number | null;
+  currentCount: number | null;
+  trialCount: number | null;
+  concreteActions: string | null;
+  internalActions: string | null;
+  /** true if this data hasn't been saved for the current week yet (carried over from a previous week as a starting draft). */
+  isDraft: boolean;
+};
+
 export const CATEGORY_LABEL: Record<Category, string> = {
   agenda: "議題",
   issue: "課題・共有",
