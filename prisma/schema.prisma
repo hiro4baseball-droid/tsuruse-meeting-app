@@ -18,6 +18,13 @@ model Member {
   createdAt DateTime @default(now())
 }
 
+// 校舎（定例議題を校舎ごとに管理するための単位）
+model Campus {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  createdAt DateTime @default(now())
+}
+
 // category: "agenda" (議題) | "issue" (課題・共有) | "task" (個人タスク)
 // status:   "todo" | "in_progress" | "done"
 model Item {
@@ -40,9 +47,11 @@ model Item {
 }
 
 // 毎回の会議で確認する定型議題（目標人数・現状・体験数・アクションリスト）
+// campusId = null は「校舎未選択」の従来データ。校舎を選ぶと校舎ごとに保存される。
 model WeeklyReport {
   id              String   @id @default(cuid())
-  meetingWeek     DateTime @unique
+  meetingWeek     DateTime
+  campusId        String?
   targetBySummer  Int?
   currentCount    Int?
   trialCount      Int?
@@ -50,6 +59,9 @@ model WeeklyReport {
   internalActions String?
   createdAt       DateTime @default(now())
   updatedAt       DateTime @updatedAt
+
+  // 一意性は API 側（find → update/create）で担保する。
+  @@index([meetingWeek, campusId])
 }
 
 model Comment {

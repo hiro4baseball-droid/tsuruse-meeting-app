@@ -43,6 +43,7 @@ export default function BacklogBoard({
                 key={item.id}
                 item={item}
                 onChanged={refresh}
+                members={members}
                 extraAction={{ label: "今週の会議に割り当て", onClick: assignToCurrentWeek }}
               />
             ))}

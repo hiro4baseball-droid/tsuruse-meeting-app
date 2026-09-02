@@ -6,6 +6,7 @@ const LINKS = [
   { href: "/tasks", label: "メンバー別タスク" },
   { href: "/backlog", label: "今後のストック" },
   { href: "/members", label: "メンバー管理" },
+  { href: "/campuses", label: "校舎管理" },
 ];
 
 export default function NavBar() {

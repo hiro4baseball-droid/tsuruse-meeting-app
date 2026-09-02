@@ -1,7 +1,15 @@
 "use client";
 
 import { useState } from "react";
-import { CATEGORY_LABEL, STATUS_LABEL, type CommentDTO, type ItemDTO, type Status } from "@/lib/types";
+import {
+  CATEGORY_LABEL,
+  STATUS_LABEL,
+  type Category,
+  type CommentDTO,
+  type ItemDTO,
+  type MemberDTO,
+  type Status,
+} from "@/lib/types";
 import { useDisplayName } from "@/hooks/useDisplayName";
 
 const CATEGORY_STYLE: Record<string, string> = {
@@ -21,11 +29,13 @@ export default function ItemCard({
   onChanged,
   extraAction,
   showWeekBadge,
+  members = [],
 }: {
   item: ItemDTO;
   onChanged: () => void;
   extraAction?: { label: string; onClick: (item: ItemDTO) => void };
   showWeekBadge?: boolean;
+  members?: MemberDTO[];
 }) {
   const [expanded, setExpanded] = useState(false);
   const [comments, setComments] = useState<CommentDTO[] | null>(null);
@@ -33,6 +43,42 @@ export default function ItemCard({
   const [commentBody, setCommentBody] = useState("");
   const [busy, setBusy] = useState(false);
   const [displayName, setDisplayName] = useDisplayName();
+
+  const [editing, setEditing] = useState(false);
+  const [editTitle, setEditTitle] = useState(item.title);
+  const [editDescription, setEditDescription] = useState(item.description ?? "");
+  const [editCategory, setEditCategory] = useState<Category>(item.category);
+  const [editAssignee, setEditAssignee] = useState(item.assignee ?? "");
+  const [editDueDate, setEditDueDate] = useState(item.dueDate ? item.dueDate.slice(0, 10) : "");
+
+  function startEdit() {
+    setEditTitle(item.title);
+    setEditDescription(item.description ?? "");
+    setEditCategory(item.category);
+    setEditAssignee(item.assignee ?? "");
+    setEditDueDate(item.dueDate ? item.dueDate.slice(0, 10) : "");
+    setEditing(true);
+  }
+
+  async function saveEdit(e: React.FormEvent) {
+    e.preventDefault();
+    if (!editTitle.trim()) return;
+    setBusy(true);
+    await fetch(`/api/items/${item.id}`, {
+      method: "PATCH",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        title: editTitle,
+        description: editDescription,
+        category: editCategory,
+        assignee: editAssignee || null,
+        dueDate: editDueDate || null,
+      }),
+    });
+    setBusy(false);
+    setEditing(false);
+    onChanged();
+  }
 
   async function toggleExpand() {
     const next = !expanded;
@@ -135,23 +181,97 @@ export default function ItemCard({
 
       {expanded && (
         <div className="mt-3 border-t border-zinc-100 dark:border-zinc-800 pt-3 space-y-3">
-          {item.description && (
-            <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">{item.description}</p>
+          {editing ? (
+            <form onSubmit={saveEdit} className="space-y-2">
+              <input
+                autoFocus
+                value={editTitle}
+                onChange={(e) => setEditTitle(e.target.value)}
+                placeholder="タイトル"
+                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 text-sm"
+              />
+              <textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                placeholder="詳細・メモ（任意）"
+                rows={3}
+                className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 text-sm whitespace-pre-wrap"
+              />
+              <div className="flex flex-wrap gap-2">
+                <select
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value as Category)}
+                  className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 text-sm"
+                >
+                  {Object.entries(CATEGORY_LABEL).map(([value, label]) => (
+                    <option key={value} value={value}>
+                      {label}
+                    </option>
+                  ))}
+                </select>
+                <input
+                  list={`edit-member-options-${item.id}`}
+                  value={editAssignee}
+                  onChange={(e) => setEditAssignee(e.target.value)}
+                  placeholder="担当者"
+                  className="w-28 rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 text-sm"
+                />
+                <datalist id={`edit-member-options-${item.id}`}>
+                  {members.map((m) => (
+                    <option key={m.id} value={m.name} />
+                  ))}
+                </datalist>
+                <input
+                  type="date"
+                  value={editDueDate}
+                  onChange={(e) => setEditDueDate(e.target.value)}
+                  className="rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 text-sm"
+                />
+              </div>
+              <div className="flex gap-2 justify-end">
+                <button
+                  type="button"
+                  onClick={() => setEditing(false)}
+                  className="rounded-lg px-3 py-1.5 text-sm text-zinc-500 hover:bg-zinc-100 dark:hover:bg-zinc-800"
+                >
+                  キャンセル
+                </button>
+                <button
+                  type="submit"
+                  disabled={busy || !editTitle.trim()}
+                  className="rounded-lg bg-indigo-600 px-3 py-1.5 text-sm font-medium text-white hover:bg-indigo-500 disabled:opacity-50"
+                >
+                  保存
+                </button>
+              </div>
+            </form>
+          ) : (
+            item.description && (
+              <p className="text-sm text-zinc-600 dark:text-zinc-400 whitespace-pre-wrap">{item.description}</p>
+            )
           )}
 
-          <div className="flex flex-wrap gap-2">
-            {extraAction && (
+          {!editing && (
+            <div className="flex flex-wrap gap-2">
+              {extraAction && (
+                <button
+                  onClick={() => extraAction.onClick(item)}
+                  className="text-xs rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-2 py-1 hover:bg-indigo-100"
+                >
+                  {extraAction.label}
+                </button>
+              )}
               <button
-                onClick={() => extraAction.onClick(item)}
-                className="text-xs rounded-lg bg-indigo-50 dark:bg-indigo-500/10 text-indigo-700 dark:text-indigo-300 px-2 py-1 hover:bg-indigo-100"
+                onClick={startEdit}
+                className="text-xs rounded-lg bg-zinc-100 dark:bg-zinc-800 text-zinc-700 dark:text-zinc-300 px-2 py-1 hover:bg-zinc-200 dark:hover:bg-zinc-700"
               >
-                {extraAction.label}
+                編集
               </button>
-            )}
-            <button onClick={remove} className="text-xs rounded-lg bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1 hover:bg-red-100">
-              削除
-            </button>
-          </div>
+              <button onClick={remove} className="text-xs rounded-lg bg-red-50 dark:bg-red-500/10 text-red-700 dark:text-red-300 px-2 py-1 hover:bg-red-100">
+                削除
+              </button>
+            </div>
+          )}
 
           <div>
             <p className="text-xs font-medium text-zinc-500 mb-1">事前コメント・メモ</p>

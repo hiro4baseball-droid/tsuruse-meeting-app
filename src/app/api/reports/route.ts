@@ -3,21 +3,27 @@ import { prisma } from "@/lib/prisma";
 import { serializeWeeklyReport } from "@/lib/serialize";
 import { fromDateKey } from "@/lib/week";
 
+/** クエリ/ボディの campus 値を campusId（string）か null に正規化する。 */
+function normalizeCampusId(value: unknown): string | null {
+  return typeof value === "string" && value.trim() ? value.trim() : null;
+}
+
 export async function GET(request: NextRequest) {
   const weekParam = request.nextUrl.searchParams.get("week");
   if (!weekParam) {
     return NextResponse.json({ error: "week is required" }, { status: 400 });
   }
   const monday = fromDateKey(weekParam);
+  const campusId = normalizeCampusId(request.nextUrl.searchParams.get("campus"));
 
-  const existing = await prisma.weeklyReport.findUnique({ where: { meetingWeek: monday } });
+  const existing = await prisma.weeklyReport.findFirst({ where: { meetingWeek: monday, campusId } });
   if (existing) {
     return NextResponse.json({ report: serializeWeeklyReport(existing, monday, false) });
   }
 
-  // No entry for this week yet: carry over the most recent earlier week's content as a draft.
+  // この週（この校舎）の入力がまだ無い場合は、直近の過去週の内容を下書きとして引き継ぐ。
   const previous = await prisma.weeklyReport.findFirst({
-    where: { meetingWeek: { lt: monday } },
+    where: { meetingWeek: { lt: monday }, campusId },
     orderBy: { meetingWeek: "desc" },
   });
   if (previous) {
@@ -33,6 +39,7 @@ export async function PUT(request: NextRequest) {
     return NextResponse.json({ error: "meetingWeek is required" }, { status: 400 });
   }
   const monday = fromDateKey(body.meetingWeek);
+  const campusId = normalizeCampusId(body.campusId);
 
   const toIntOrNull = (v: unknown) => {
     if (v === null || v === undefined || v === "") return null;
@@ -49,11 +56,12 @@ export async function PUT(request: NextRequest) {
     internalActions: toStringOrNull(body.internalActions),
   };
 
-  const report = await prisma.weeklyReport.upsert({
-    where: { meetingWeek: monday },
-    create: { meetingWeek: monday, ...data },
-    update: data,
-  });
+  // (meetingWeek, campusId) が複合ユニーク。campusId が null のとき Postgres は
+  // NULL を区別するため upsert が使えないので、find → update/create で処理する。
+  const existing = await prisma.weeklyReport.findFirst({ where: { meetingWeek: monday, campusId } });
+  const report = existing
+    ? await prisma.weeklyReport.update({ where: { id: existing.id }, data })
+    : await prisma.weeklyReport.create({ data: { meetingWeek: monday, campusId, ...data } });
 
   return NextResponse.json({ report: serializeWeeklyReport(report, monday, false) });
 }

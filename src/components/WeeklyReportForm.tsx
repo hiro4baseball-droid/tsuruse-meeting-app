@@ -7,9 +7,11 @@ import type { WeeklyReportDTO } from "@/lib/types";
 export default function WeeklyReportForm({
   report,
   meetingWeek,
+  campusId,
 }: {
   report: WeeklyReportDTO | null;
   meetingWeek: string;
+  campusId: string | null;
 }) {
   const router = useRouter();
   const [targetBySummer, setTargetBySummer] = useState(report?.targetBySummer?.toString() ?? "");
@@ -28,6 +30,7 @@ export default function WeeklyReportForm({
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
         meetingWeek,
+        campusId,
         targetBySummer,
         currentCount,
         trialCount,
@@ -53,7 +56,7 @@ export default function WeeklyReportForm({
 
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
         <label className="text-sm">
-          <span className="block text-zinc-500 mb-1">① 夏までの目標</span>
+          <span className="block text-zinc-500 mb-1">① 目標</span>
           <input
             type="number"
             value={targetBySummer}

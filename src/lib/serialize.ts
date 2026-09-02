@@ -1,4 +1,4 @@
-import type { Category, ItemDTO, MemberDTO, Status, WeeklyReportDTO } from "@/lib/types";
+import type { CampusDTO, Category, ItemDTO, MemberDTO, Status, WeeklyReportDTO } from "@/lib/types";
 
 type PrismaItem = {
   id: string;
@@ -40,8 +40,17 @@ export function serializeMember(member: { id: string; name: string; createdAt: D
   };
 }
 
+export function serializeCampus(campus: { id: string; name: string; createdAt: Date }): CampusDTO {
+  return {
+    id: campus.id,
+    name: campus.name,
+    createdAt: campus.createdAt.toISOString(),
+  };
+}
+
 type PrismaWeeklyReport = {
   meetingWeek: Date;
+  campusId: string | null;
   targetBySummer: number | null;
   currentCount: number | null;
   trialCount: number | null;
@@ -56,6 +65,7 @@ export function serializeWeeklyReport(
 ): WeeklyReportDTO {
   return {
     meetingWeek: meetingWeek.toISOString(),
+    campusId: report.campusId,
     targetBySummer: report.targetBySummer,
     currentCount: report.currentCount,
     trialCount: report.trialCount,

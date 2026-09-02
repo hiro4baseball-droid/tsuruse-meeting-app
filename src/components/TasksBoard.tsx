@@ -28,7 +28,7 @@ export default function TasksBoard({ items, members }: { items: ItemDTO[]; membe
             </h2>
             {groupItems.length === 0 && <p className="text-xs text-zinc-400">対応中のタスクはありません</p>}
             {groupItems.map((item) => (
-              <ItemCard key={item.id} item={item} onChanged={refresh} showWeekBadge />
+              <ItemCard key={item.id} item={item} onChanged={refresh} members={members} showWeekBadge />
             ))}
             {name !== "担当未定" && (
               <AddItemForm

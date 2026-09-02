@@ -30,8 +30,15 @@ export type MemberDTO = {
   createdAt: string;
 };
 
+export type CampusDTO = {
+  id: string;
+  name: string;
+  createdAt: string;
+};
+
 export type WeeklyReportDTO = {
   meetingWeek: string;
+  campusId: string | null;
   targetBySummer: number | null;
   currentCount: number | null;
   trialCount: number | null;
