@@ -32,6 +32,14 @@ export async function PATCH(request: NextRequest, ctx: RouteContext<"/api/items/
       return NextResponse.json({ error: "invalid status" }, { status: 400 });
     }
     data.status = body.status;
+    // 完了にした日時を記録する。完了→完了の再保存では上書きせず、未完了に戻したら消す。
+    if (body.status === "done") {
+      const current = await prisma.item.findUnique({ where: { id }, select: { status: true, completedAt: true } });
+      if (!current) return NextResponse.json({ error: "not found" }, { status: 404 });
+      if (current.status !== "done" || !current.completedAt) data.completedAt = new Date();
+    } else {
+      data.completedAt = null;
+    }
   }
   if (body.assignee !== undefined) {
     data.assignee = typeof body.assignee === "string" && body.assignee ? body.assignee : null;

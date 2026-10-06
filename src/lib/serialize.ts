@@ -9,6 +9,7 @@ type PrismaItem = {
   assignee: string | null;
   dueDate: Date | null;
   meetingWeek: Date | null;
+  completedAt: Date | null;
   createdBy: string | null;
   createdAt: Date;
   updatedAt: Date;
@@ -25,6 +26,7 @@ export function serializeItem(item: PrismaItem): ItemDTO {
     assignee: item.assignee,
     dueDate: item.dueDate ? item.dueDate.toISOString() : null,
     meetingWeek: item.meetingWeek ? item.meetingWeek.toISOString() : null,
+    completedAt: item.completedAt ? item.completedAt.toISOString() : null,
     createdBy: item.createdBy,
     createdAt: item.createdAt.toISOString(),
     updatedAt: item.updatedAt.toISOString(),
