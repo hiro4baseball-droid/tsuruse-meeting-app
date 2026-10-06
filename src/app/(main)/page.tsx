@@ -37,12 +37,8 @@ export default async function AgendaPage({
         ? {
             OR: [
               { meetingWeek: monday },
-              // 前週以前から未完了のまま残っているものを引き継ぎ表示する。
-              // この週に入ってから完了にしたものは、会議中に消えないよう残す。
-              {
-                meetingWeek: { lt: monday },
-                OR: [{ status: { not: "done" } }, { status: "done", updatedAt: { gte: monday } }],
-              },
+              // 前週以前から未完了のまま残っているものだけを引き継ぎ表示する。
+              { meetingWeek: { lt: monday }, status: { not: "done" } },
             ],
           }
         : { meetingWeek: monday },
