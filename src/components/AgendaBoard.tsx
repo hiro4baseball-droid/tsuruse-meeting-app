@@ -30,7 +30,13 @@ export default function AgendaBoard({
               <span className="ml-1 text-xs font-normal text-zinc-400">{categoryItems.length}</span>
             </h2>
             {categoryItems.map((item) => (
-              <ItemCard key={item.id} item={item} onChanged={refresh} members={members} />
+              <ItemCard
+                key={item.id}
+                item={item}
+                onChanged={refresh}
+                members={members}
+                carriedOver={!!item.meetingWeek && item.meetingWeek.slice(0, 10) < meetingWeek}
+              />
             ))}
             <AddItemForm
               members={members}

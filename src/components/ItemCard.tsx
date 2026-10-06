@@ -29,12 +29,15 @@ export default function ItemCard({
   onChanged,
   extraAction,
   showWeekBadge,
+  carriedOver,
   members = [],
 }: {
   item: ItemDTO;
   onChanged: () => void;
   extraAction?: { label: string; onClick: (item: ItemDTO) => void };
   showWeekBadge?: boolean;
+  /** 前週以前から引き継がれて表示されている項目 */
+  carriedOver?: boolean;
   members?: MemberDTO[];
 }) {
   const [expanded, setExpanded] = useState(false);
@@ -140,6 +143,11 @@ export default function ItemCard({
             {item.assignee && (
               <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-zinc-100 dark:bg-zinc-800 text-zinc-600 dark:text-zinc-300">
                 担当: {item.assignee}
+              </span>
+            )}
+            {carriedOver && item.meetingWeek && (
+              <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-amber-100 text-amber-800 dark:bg-amber-500/20 dark:text-amber-300">
+                引き継ぎ（{new Date(item.meetingWeek).getUTCMonth() + 1}/{new Date(item.meetingWeek).getUTCDate()}の週〜）
               </span>
             )}
             {showWeekBadge && (
