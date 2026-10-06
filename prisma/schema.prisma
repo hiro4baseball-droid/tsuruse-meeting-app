@@ -35,6 +35,7 @@ model Item {
   status      String    @default("todo")
   assignee    String?
   dueDate     DateTime?
+  completedAt DateTime? // 完了にした日時（未完了に戻すと null）
   meetingWeek DateTime? // Monday of the target week; null = backlog (今後のストック)
   createdBy   String?
   createdAt   DateTime  @default(now())

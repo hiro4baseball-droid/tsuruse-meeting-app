@@ -10,6 +10,7 @@ export type ItemDTO = {
   assignee: string | null;
   dueDate: string | null;
   meetingWeek: string | null;
+  completedAt: string | null;
   createdBy: string | null;
   createdAt: string;
   updatedAt: string;

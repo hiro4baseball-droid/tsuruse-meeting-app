@@ -157,6 +157,11 @@ export default function ItemCard({
                   : "ストック"}
               </span>
             )}
+            {item.status === "done" && item.completedAt && (
+              <span className="rounded-full px-2 py-0.5 text-xs font-medium bg-green-100 text-green-700 dark:bg-green-500/20 dark:text-green-300">
+                完了: {new Date(item.completedAt).toLocaleDateString("ja-JP", { timeZone: "Asia/Tokyo", month: "numeric", day: "numeric" })}
+              </span>
+            )}
             {item.dueDate && (
               <span
                 className={`rounded-full px-2 py-0.5 text-xs font-medium ${

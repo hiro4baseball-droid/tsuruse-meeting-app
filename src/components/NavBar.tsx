@@ -5,6 +5,7 @@ const LINKS = [
   { href: "/", label: "今週の会議" },
   { href: "/tasks", label: "メンバー別タスク" },
   { href: "/backlog", label: "今後のストック" },
+  { href: "/completed", label: "完了済み" },
   { href: "/members", label: "メンバー管理" },
   { href: "/campuses", label: "校舎管理" },
 ];
