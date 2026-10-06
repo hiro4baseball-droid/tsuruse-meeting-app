@@ -16,7 +16,10 @@ export default async function AgendaPage({
   const { week, campus } = await searchParams;
   const monday = week ? fromDateKey(week) : mondayOf(new Date());
   const weekKey = toDateKey(monday);
-  const isCurrentWeek = weekKey === toDateKey(mondayOf(new Date()));
+  const currentWeekKey = toDateKey(mondayOf(new Date()));
+  const isCurrentWeek = weekKey === currentWeekKey;
+  // 過去の週は当時の記録をそのまま見せ、今週以降だけ引き継ぎ表示する
+  const carryOver = weekKey >= currentWeekKey;
 
   const campuses = await prisma.campus.findMany({ orderBy: { name: "asc" } });
   // URL の campus が実在する校舎のときだけ採用する
@@ -30,7 +33,19 @@ export default async function AgendaPage({
 
   const [items, members, thisWeekReport, previousReport] = await Promise.all([
     prisma.item.findMany({
-      where: { meetingWeek: monday },
+      where: carryOver
+        ? {
+            OR: [
+              { meetingWeek: monday },
+              // 前週以前から未完了のまま残っているものを引き継ぎ表示する。
+              // この週に入ってから完了にしたものは、会議中に消えないよう残す。
+              {
+                meetingWeek: { lt: monday },
+                OR: [{ status: { not: "done" } }, { status: "done", updatedAt: { gte: monday } }],
+              },
+            ],
+          }
+        : { meetingWeek: monday },
       orderBy: [{ status: "asc" }, { createdAt: "asc" }],
       include: { _count: { select: { comments: true } } },
     }),
