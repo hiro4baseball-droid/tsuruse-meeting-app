@@ -58,6 +58,7 @@ type PrismaWeeklyReport = {
   trialCount: number | null;
   concreteActions: string | null;
   internalActions: string | null;
+  weeklyTasks: string | null;
 };
 
 export function serializeWeeklyReport(
@@ -73,6 +74,7 @@ export function serializeWeeklyReport(
     trialCount: report.trialCount,
     concreteActions: report.concreteActions,
     internalActions: report.internalActions,
+    weeklyTasks: report.weeklyTasks,
     isDraft,
   };
 }

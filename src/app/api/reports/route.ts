@@ -54,6 +54,7 @@ export async function PUT(request: NextRequest) {
     trialCount: toIntOrNull(body.trialCount),
     concreteActions: toStringOrNull(body.concreteActions),
     internalActions: toStringOrNull(body.internalActions),
+    weeklyTasks: toStringOrNull(body.weeklyTasks),
   };
 
   // (meetingWeek, campusId) が複合ユニーク。campusId が null のとき Postgres は

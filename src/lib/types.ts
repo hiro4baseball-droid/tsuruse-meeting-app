@@ -45,6 +45,7 @@ export type WeeklyReportDTO = {
   trialCount: number | null;
   concreteActions: string | null;
   internalActions: string | null;
+  weeklyTasks: string | null;
   /** true if this data hasn't been saved for the current week yet (carried over from a previous week as a starting draft). */
   isDraft: boolean;
 };
