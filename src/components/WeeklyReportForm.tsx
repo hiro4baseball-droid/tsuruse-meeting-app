@@ -19,6 +19,7 @@ export default function WeeklyReportForm({
   const [trialCount, setTrialCount] = useState(report?.trialCount?.toString() ?? "");
   const [concreteActions, setConcreteActions] = useState(report?.concreteActions ?? "");
   const [internalActions, setInternalActions] = useState(report?.internalActions ?? "");
+  const [weeklyTasks, setWeeklyTasks] = useState(report?.weeklyTasks ?? "");
   const [saving, setSaving] = useState(false);
   const [savedJustNow, setSavedJustNow] = useState(false);
 
@@ -36,6 +37,7 @@ export default function WeeklyReportForm({
         trialCount,
         concreteActions,
         internalActions,
+        weeklyTasks,
       }),
     });
     setSaving(false);
@@ -99,6 +101,16 @@ export default function WeeklyReportForm({
         <textarea
           value={internalActions}
           onChange={(e) => setInternalActions(e.target.value)}
+          rows={6}
+          className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 whitespace-pre-wrap"
+        />
+      </label>
+
+      <label className="block text-sm">
+        <span className="block text-zinc-500 mb-1">⑥ 今週やること</span>
+        <textarea
+          value={weeklyTasks}
+          onChange={(e) => setWeeklyTasks(e.target.value)}
           rows={6}
           className="w-full rounded-lg border border-zinc-300 dark:border-zinc-700 bg-transparent px-2 py-1.5 whitespace-pre-wrap"
         />
